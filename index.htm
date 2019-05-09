@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8"/>
+        <script src="Chart.js-2.8.0/Chart.js"></script>
+        <script>
+            fetch("read.php?token=*kraeftspindel1&fields=angle,temperature,battery")
+                .then(response => response.json())
+                .then(json => {
+                    const angles = [];
+                    const temperatures = [];
+                    for(let i = 0; i < json.length; i++) {
+                        let dateString = json[i]["t"];
+                        let dateInt = Date.parse(dateString); // TODO: format gleich aus db als unix time lesen
+                        angles.push({
+                            "x": dateInt,
+                            "y": json[i]["angle"]
+                        });
+                        temperatures.push({
+                            "x": dateInt,
+                            "y": json[i]["temperature"]
+                        });
+                    }
+
+                    document.getElementById("lastMeasuring").innerText = JSON.stringify(json[json.length - 1]);
+                    
+                    const myOptions = {
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return formatDate(value);
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                    new Chart(document.getElementById('angleChart'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: "Angle",
+                                data: angles,
+                                showLine: true,
+                                pointRadius: 1
+                            }]
+                        },
+                        options: myOptions
+                    });
+                    new Chart(document.getElementById('temperatureChart'), {
+                        type: 'scatter',
+                        data: {
+                            datasets: [{
+                                label: "Temperature",
+                                data: temperatures,
+                                showLine: true,
+                                pointRadius: 1
+                            }]
+                        },
+                        options: myOptions
+                    });
+    
+            });
+            function formatDate(dateInt) {
+                const date = new Date(dateInt);
+                let dateString = date.getDate() + "." 
+                    + (date.getMonth() + 1) + "."
+                    + date.getFullYear() + " "
+                    + date.getHours() + ":";
+                if(date.getMinutes() < 10) {
+                    dateString += "0";
+                }
+                dateString += date.getMinutes();
+                return dateString;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="lastMeasuring"></div>
+        <div id="angle">
+            <canvas id="angleChart"></canvas>
+        </div>
+        <div id="temperature">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+    </body>
+</html>

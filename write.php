@@ -1,6 +1,6 @@
 <?php
 
-include("sec.inc");
+include("backend/sec.inc");
 $u = $_SERVER['PHP_AUTH_USER'];
 $p = $_SERVER['PHP_AUTH_PW'];
 if($u != $userToCompare || $p != $passToCompare) {
@@ -15,7 +15,7 @@ if(!$json) {
 }
 
 // log in sqlite
-$dbFile = "ispindel";
+$dbFile = "backend/ispindel";
 $dbTable = "ispindel";
 $dbQuery = "INSERT INTO $dbTable (id, token, angle, temperature, battery, gravity, interval, rssi, datetime) "
     ."VALUES ("

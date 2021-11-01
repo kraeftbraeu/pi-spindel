@@ -16,7 +16,7 @@
         <script src="Chart.js-3.6.0/chart.min.js"></script>
         <script>
             const isMock = window.location.hash === "#mock";
-            fetch(isMock ? "read.json" : "read.php?token=*kraeftspindel1&fields=angle,temperature,battery")
+            fetch(isMock ? "backend/read.json" : "backend/read.php?token=*kraeftspindel1&fields=angle,temperature,battery")
                 .then(response => response.json())
                 .then(json => {
                     const angles = [];

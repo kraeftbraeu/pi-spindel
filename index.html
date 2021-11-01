@@ -18,7 +18,30 @@
         <script>
             document.addEventListener ("DOMContentLoaded", () => {
                 showCharts();
+
+                loadSources();
             });
+
+            function loadSources() {
+                fetch("backend/list.php")
+                .then(response => response.json())
+                .then(json => {
+                    const sources = document.getElementById("sources");
+                    while (sources.firstChild) {
+                        sources.removeChild(sources.firstChild);
+                    }
+                    json.forEach(el => {
+                        const li = document.createElement("li");
+                        li.textContent = el;
+                        li.onclick = (e) => {
+                            window.location.hash = '#' + el;
+                            showCharts();
+                        };
+                        sources.append(li);
+                    });
+                })
+                .catch(e => console.error(e));
+            }
 
     	    function toggleSources() {
                 const sources = document.getElementById("sources");
@@ -33,7 +56,7 @@
     <body>
         <div id="values"></div>
         <div id="menu">
-            <button onclick="toggleSources()">source: db</button>
+            <button onclick="toggleSources()">source</button>
             <ul id="sources" style="display:none">
                 <li>db</li>
             </ul>

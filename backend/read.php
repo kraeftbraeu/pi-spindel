@@ -20,7 +20,7 @@ if(!$fields) {
 }
 
 $data = array();
-$dbQuery = "SELECT ".$fields.", datetime as t FROM ".$dbTable." WHERE token ='".$token."' ORDER BY datetime";
+$dbQuery = "SELECT ".$fields.", datetime FROM ".$dbTable." WHERE token ='".$token."' ORDER BY datetime";
 $db = new SQLite3($dbFile);
 $results = $db->query($dbQuery);
 if(!$results) {

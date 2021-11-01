@@ -1,13 +1,38 @@
+var angleChart;
+var temperatureChart;
+
 function showCharts() {
-    const isMock = window.location.hash === "#mock";
-    fetch(isMock ? "backend/read.json" : "backend/read.php?token=*kraeftspindel1&fields=angle,temperature,battery")
+    var chartUrl;
+    console.log(window.location.hash);
+    if(window.location.hash === "#mock") {
+        chartUrl = "backend/read.json"
+    } else {
+        var hash = window.location.hash;
+        if(hash && hash.length > 1) {
+            chartUrl = "backend/backups/" + hash.substr(1);
+        } else {
+            chartUrl = "backend/read.php?token=*kraeftspindel1&fields=angle,temperature,battery";
+        }
+    }
+    fetch(chartUrl)
     .then(response => response.json())
     .then(json => {
+    const values = document.getElementById("values");
+        while (values.firstChild) {
+            values.removeChild(values.firstChild);
+        }
+        if(angleChart) {
+            angleChart.destroy();
+        }
+        if(temperatureChart) {
+            temperatureChart.destroy();
+        }
+
         const angles = [];
         const temperatures = [];
         for(let i = 0; i < json.length; i++) {
-            let dateString = json[i]["t"];
-            let dateInt = Date.parse(dateString); // TODO: format gleich aus db als unix time lesen
+            let dateString = json[i]["datetime"];
+            let dateInt = Date.parse(dateString);
             angles.push({
                 "x": dateInt,
                 "y": json[i]["angle"]
@@ -21,10 +46,10 @@ function showCharts() {
         const lastMeasuring = json[json.length - 1];
 
         // last update
-        addData("last update (UTC)", formatDate(lastMeasuring["t"]), new Date().getTime() - new Date(lastMeasuring["t"]).getTime() > 90 * 60 * 1000);
+        addData("last update (UTC)", formatDate(lastMeasuring["datetime"]), new Date().getTime() - new Date(lastMeasuring["datetime"]).getTime() > 90 * 60 * 1000);
 
         // duration
-        const diff = (new Date(lastMeasuring["t"]).getTime() - new Date(json[0]["t"]).getTime()) / 1000;
+        const diff = (new Date(lastMeasuring["datetime"]).getTime() - new Date(json[0]["datetime"]).getTime()) / 1000;
         const h = (diff - diff%3600) / 3600;
         const d = (h - h%24) / 24;
         addData("duration", d + "d " + h%24 + "h"), d < 0 || h < 0 || d > 28 || h > 23;
@@ -56,7 +81,7 @@ function showCharts() {
                 }
             }
         }
-        new Chart(document.getElementById('angleChart'), {
+        angleChart = new Chart(document.getElementById('angleChart'), {
             type: 'scatter',
             data: {
                 datasets: [{
@@ -69,7 +94,7 @@ function showCharts() {
             },
             options: myOptions
         });
-        new Chart(document.getElementById('temperatureChart'), {
+        temperatureChart = new Chart(document.getElementById('temperatureChart'), {
             type: 'scatter',
             data: {
                 datasets: [{

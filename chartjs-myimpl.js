@@ -1,10 +1,14 @@
 var angleChart;
 var temperatureChart;
 
+document.addEventListener ("DOMContentLoaded", () => {
+    showCharts();
+    loadSources();
+});
+
 function showCharts() {
     var chartUrl;
-    console.log(window.location.hash);
-    if(window.location.hash === "#mock") {
+    if(window.location.host === "localhost:3000") {
         chartUrl = "backend/read.json"
     } else {
         var hash = window.location.hash;
@@ -55,13 +59,13 @@ function showCharts() {
         addData("duration", d + "d " + h%24 + "h"), d < 0 || h < 0 || d > 28 || h > 23;
 
         // temperature
-        addData("temperature", lastMeasuring["temperature"], lastMeasuring["temperature"] < 9.0 || lastMeasuring["temperature"] > 25.0);
+        addData("temperature", lastMeasuring["temperature"] + "°", lastMeasuring["temperature"] < 9.0 || lastMeasuring["temperature"] > 25.0);
 
         // angle
-        addData("angle", lastMeasuring["angle"], lastMeasuring["angle"] < 0.0 || lastMeasuring["angle"] > 90.0);
+        addData("angle", lastMeasuring["angle"] + "°", lastMeasuring["angle"] < 0.0 || lastMeasuring["angle"] > 90.0);
 
         // battery
-        addData("battery", lastMeasuring["battery"], lastMeasuring["battery"] < 3.0);
+        addData("battery", lastMeasuring["battery"] + " V", lastMeasuring["battery"] < 3.0);
 
         const myOptions = {
             scales: {
@@ -108,6 +112,15 @@ function showCharts() {
             options: myOptions
         });
     });
+    hash = window.location.hash;
+    document.getElementById("source").textContent = hash;
+    if(!hash || hash.length <= 1) {
+        document.getElementById("savebutton").style.display = "";
+        document.getElementById("clearbutton").style.display = "";
+    } else {
+        document.getElementById("savebutton").style.display = "none";
+        document.getElementById("clearbutton").style.display = "none";
+    }
 }
 
 function formatDate(dateInt) {
@@ -136,4 +149,42 @@ function addData(title, value, doWarn = false) {
         val.style.backgroundColor = "#faa";
 
     document.getElementById("values").appendChild(val);
+}
+
+function loadSources() {
+    fetch(window.location.host === "localhost:3000" ? "backend/list.json" : "backend/list.php")
+    .then(response => response.json())
+    .then(json => {
+        const sources = document.getElementById("sources");
+        while (sources.firstChild) {
+            sources.removeChild(sources.firstChild);
+        }
+        json.unshift("current");
+        json.forEach(el => {
+            const li = document.createElement("li");
+            li.textContent = el;
+            if(el === "current") {
+                li.onclick = (e) => {
+                    window.location.hash = "";
+                    showCharts();
+                };
+            } else {
+                li.onclick = (e) => {
+                    window.location.hash = "#" + el;
+                    showCharts();
+                };
+            }
+            sources.append(li);
+        });
+    })
+    .catch(e => console.error(e));
+}
+
+function toggleSources() {
+    const sources = document.getElementById("sources");
+    sources.style.display = sources.style.display == "none" ? "" : "none";
+}
+
+function save(anddelete = false) {
+    window.location = "backend/reset.php?doit=" + (anddelete ? "anddelete" : "true");
 }

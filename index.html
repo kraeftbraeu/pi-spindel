@@ -12,56 +12,27 @@
                 box-sizing: border-box;
                 float: left;
             }
+            li {
+                cursor: pointer;
+                padding: 5px;
+                margin: 10px;
+            }
+            li:hover {
+                background-color: #eee;
+            }
         </style>
         <script src="Chart.js-3.6.0/chart.min.js"></script>
         <script src="chartjs-myimpl.js"></script>
-        <script>
-            document.addEventListener ("DOMContentLoaded", () => {
-                showCharts();
-
-                loadSources();
-            });
-
-            function loadSources() {
-                fetch("backend/list.php")
-                .then(response => response.json())
-                .then(json => {
-                    const sources = document.getElementById("sources");
-                    while (sources.firstChild) {
-                        sources.removeChild(sources.firstChild);
-                    }
-                    json.forEach(el => {
-                        const li = document.createElement("li");
-                        li.textContent = el;
-                        li.onclick = (e) => {
-                            window.location.hash = '#' + el;
-                            showCharts();
-                        };
-                        sources.append(li);
-                    });
-                })
-                .catch(e => console.error(e));
-            }
-
-    	    function toggleSources() {
-                const sources = document.getElementById("sources");
-                sources.style.display = sources.style.display == "none" ? "" : "none";
-	        }
-
-	        function save(anddelete = false) {
-	            window.location = "backend/reset.php?doit=" + (anddelete ? "anddelete" : "true");
-	        }
-        </script>
     </head>
     <body>
         <div id="values"></div>
         <div id="menu">
-            <button onclick="toggleSources()">source</button>
+            <button onclick="toggleSources()">source <span id="source"></span></button>
             <ul id="sources" style="display:none">
-                <li>db</li>
+                <li>current</li>
             </ul>
-            <button onclick="save()">save</button>
-            <button onclick="save(true)">clear db</button>
+            <button id="savebutton" onclick="save()">save</button>
+            <button id="clearbutton" onclick="save(true)">clear db</button>
         </div>
         <div id="angle">
             <canvas id="angleChart"></canvas>

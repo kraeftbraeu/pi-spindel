@@ -23,6 +23,10 @@ $data = array();
 $dbQuery = "SELECT ".$fields.", datetime as t FROM ".$dbTable." WHERE token ='".$token."' ORDER BY datetime";
 $db = new SQLite3($dbFile);
 $results = $db->query($dbQuery);
+if(!$results) {
+    ?>database not available<?php
+    exit;
+}
 while($row = $results->fetchArray(SQLITE3_ASSOC)) {
     array_push($data, $row);
 }

@@ -1,28 +1,34 @@
 <?php
 
-$json = json_decode(file_get_contents('php://input'), true);
+include("sec.inc");
+$u = $_SERVER['PHP_AUTH_USER'];
+$p = $_SERVER['PHP_AUTH_PW'];
+if($u != $userToCompare || $p != $passToCompare) {
+	header("HTTP/1.1 401 Unauthorized");
+	exit;
+}
+
+$now = urldecode($_GET['time']);
+$json = json_decode(base64_decode($_GET['data']));
 if(!$json) {
     die("no data found");
 }
-//file_put_contents("1-json.log", json_encode($json, JSON_PRETTY_PRINT));
 
+// log in sqlite
 $dbFile = "ispindel";
 $dbTable = "ispindel";
-$now = (new DateTime())->format('Y-m-d H:i:s');
 $dbQuery = "INSERT INTO $dbTable (id, token, angle, temperature, battery, gravity, interval, rssi, datetime) "
     ."VALUES ("
-    .$json['ID'].", "
-    ."'".$json['token']."', "
-    .$json['angle'].", "
-    .$json['temperature'].", "
-    .$json['battery'].", "
-    .$json['gravity'].", "
-    .$json['interval'].", "
-    .$json['RSSI'].", "
+    .$json->ID.", "
+    ."'".$json->token."', "
+    .$json->angle.", "
+    .$json->temperature.", "
+    .$json->battery.", "
+    .$json->gravity.", "
+    .$json->interval.", "
+    .$json->RSSI.", "
     ."'".$now."'"
     .")";
-//file_put_contents("1-query.log", $dbQuery);
 $db = new SQLite3($dbFile);
 $db->exec($dbQuery);
-
 ?>

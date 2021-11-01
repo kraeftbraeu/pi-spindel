@@ -23,9 +23,14 @@ while($row = $results->fetchArray(SQLITE3_ASSOC)) {
 
 echo count($data)." datasets to backup...";
 
+if (!is_dir('backups')) {
+    mkdir('backups');
+}
 file_put_contents($backup, json_encode($data));
 
-$db->exec("DELETE FROM ".$dbTable." WHERE ".$where);
+if(strcmp($doit, "anddelete") == 0) {
+    $db->exec("DELETE FROM ".$dbTable." WHERE ".$where);
+}
 
 ?>
 <h1>Done</h1>
